@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Feed Estetiche">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+</style>
+<title>Feed Estetiche</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: una colonna stretta pensata per iPhone. In alto le parole chiave, sotto le schede-estetica con palette e griglia 3x3 del feed. */
+:root {
+  --bg: #EEF1F6;
+  --surface: #FFFFFF;
+  --ink: #12182B;
+  --muted: #5A6378;
+  --line: #D5DAE5;
+  --accent: #2F4BFF;
+  --accent-ink: #FFFFFF;
+  --chip: #E1E6F2;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "DM Sans", -apple-system, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1220; --surface: #171C2E; --ink: #EDF0F8; --muted: #98A2BC;
+    --line: #2A3250; --accent: #7C8CFF; --accent-ink: #0E1220; --chip: #232A45;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1220; --surface: #171C2E; --ink: #EDF0F8; --muted: #98A2BC;
+  --line: #2A3250; --accent: #7C8CFF; --accent-ink: #0E1220; --chip: #232A45;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 56px;
+}
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+.lead { color: var(--muted); margin: 8px 0 0; max-width: 46ch; }
+.tabs { display: flex; gap: 8px; }
+.tab { font: inherit; font-weight: 700; font-size: 0.9rem; border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+form { display: flex; flex-direction: column; gap: 10px; }
+label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+input[type="text"] { flex: 1 1 220px; min-width: 0; font: inherit; font-size: 1rem; padding: 14px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.go { flex: 0 0 auto; font-weight: 700; padding: 14px 20px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); }
+.ex { display: flex; flex-wrap: wrap; gap: 8px; }
+.ex button { border: 0; background: var(--chip); color: var(--ink); padding: 7px 12px; border-radius: 999px; font-size: 0.85rem; }
+.ghost { border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 10px 14px; border-radius: 10px; font-weight: 500; font-size: 0.9rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.card-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.card-head > div { min-width: 0; }
+.kicker { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.card h2 { font-size: 1.6rem; letter-spacing: -0.015em; margin-top: 2px; }
+.desc { color: var(--muted); margin: 6px 0 0; font-size: 0.95rem; }
+.save { flex: 0 0 auto; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 10px; padding: 8px 12px; font-size: 0.85rem; font-weight: 700; }
+.save[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.sec { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pal { display: grid; grid-template-columns: repeat(5, 1fr); border-radius: 12px; overflow: hidden; }
+.sw { border: 0; border-radius: 0; min-width: 0; padding: 26px 4px 8px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--chip); border-radius: 999px; padding: 4px 11px; font-size: 0.85rem; }
+.chip.hit { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.kv { display: grid; grid-template-columns: 5.5rem 1fr; gap: 4px 12px; font-size: 0.92rem; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.tile { aspect-ratio: 1; max-width: 100%; min-width: 0; padding: 8px; display: flex; align-items: flex-end; font-size: 0.72rem; line-height: 1.25; font-weight: 500; overflow-wrap: anywhere; border-radius: 4px; }
+.tile.q { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; line-height: 1.1; }
+.bio { background: var(--bg); border-radius: 12px; padding: 12px; white-space: pre-line; font-size: 0.92rem; overflow-wrap: anywhere; }
+.tags { color: var(--accent); font-weight: 500; overflow-wrap: anywhere; font-size: 0.92rem; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.empty { color: var(--muted); text-align: center; padding: 32px 8px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 0.9rem; z-index: 20; }
+@media (prefers-reduced-motion: no-preference) { .card { animation: up 0.35s ease both; } @keyframes up { from { opacity: 0.001; transform: translateY(8px); } to { opacity: 1; transform: none; } } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Feed Estetiche</h1>
+    <p class="lead">Scrivi alcune parole chiave. Ti propongo tre estetiche con palette, font e una griglia pronta per il tuo feed Instagram.</p>
+  </header>
+
+  <div class="tabs" role="group" aria-label="Sezioni">
+    <button class="tab" id="tab-crea" aria-pressed="true" type="button">Crea</button>
+    <button class="tab" id="tab-salvate" aria-pressed="false" type="button">Salvate (0)</button>
+  </div>
+
+  <section id="view-crea" class="wrap" style="gap:20px">
+    <form id="f">
+      <label for="kw">Le tue parole chiave</label>
+      <div class="row">
+        <input type="text" id="kw" value="mare, estate, vintage" autocomplete="off" autocapitalize="none" enterkeyhint="go">
+        <button class="go" type="submit">Crea estetiche</button>
+      </div>
+      <div class="ex" id="ex" aria-label="Esempi"></div>
+    </form>
+    <div id="out" class="wrap" style="gap:20px"></div>
+    <div><button class="ghost" id="more" type="button">Mostra altre varianti</button></div>
+  </section>
+
+  <section id="view-salvate" class="wrap" style="gap:20px" hidden></section>
+</div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+const LIB = [
+{ nome:'Dark Academia', kw:['libri','libro','biblioteca','studio','autunno','vintage','universita','accademia','academia','dark','poesia','scrittura','classico','candele'],
+  desc:'Atmosfera da biblioteca antica: legno scuro, carta ingiallita e luce di candela.',
+  pal:['#2B1D16','#5C3D2E','#8B6B3E','#A89F86','#E4D8C0'], font:'Playfair Display + Lora',
+  mood:['Colto','Malinconico','Intimo','Senza tempo'], luce:'Calda e bassa, ombre profonde, toni seppia.',
+  ideas:['Foto: pila di libri e tazza','Reel: pagine girate piano','Citazione di un poeta','Scrivania al tramonto','Dettaglio: penna stilografica','Carosello: libri del mese','Foto: finestra con pioggia'],
+  tag:['#darkacademia','#bookstagram','#autunno','#vintagevibes','#studygram'] },
+{ nome:'Cottagecore', kw:['campagna','fiori','fiore','natura','pane','giardino','cottage','cottagecore','primavera','romantico','rustico','erbe','picnic','miele'],
+  desc:'Vita di campagna sognata: fiori di campo, tovaglie a quadri e cucina fatta in casa.',
+  pal:['#6B8F5E','#A8C686','#F2E2B1','#E9A8A6','#FAF3E3'], font:'Cormorant Garamond + Nunito',
+  mood:['Dolce','Rilassato','Romantico','Naturale'], luce:'Luce del mattino morbida, leggermente sovraesposta.',
+  ideas:['Foto: cesto di fiori freschi','Reel: impasto del pane','Dettaglio: tazza e biscotti','Picnic sul prato','Foto: bucato steso al sole','Carosello: giornata in giardino','Ricetta della nonna'],
+  tag:['#cottagecore','#slowliving','#giardino','#vitadicampagna','#fattoincasa'] },
+{ nome:'Minimal Nordico', kw:['minimal','minimalista','minimalismo','pulito','bianco','nordico','scandinavo','casa','calma','neutro','semplice','ordine','silenzio'],
+  desc:'Pochi oggetti, tanto spazio vuoto e colori quasi senza saturazione.',
+  pal:['#1F2326','#6F7A80','#B9C2C6','#E6E9EA','#FAFAF8'], font:'Inter + Space Grotesk',
+  mood:['Calmo','Ordinato','Luminoso','Essenziale'], luce:'Luce diffusa da finestra, niente flash, molto bianco.',
+  ideas:['Foto: un oggetto su fondo chiaro','Reel: casa in ordine','Dettaglio: texture del lino','Testo: una frase sola','Foto: ombra sul muro','Carosello: 5 regole di calma','Pianta in vaso bianco'],
+  tag:['#minimal','#scandinavianstyle','#lessismore','#calmvibes','#interiordesign'] },
+{ nome:'Y2K Pop', kw:['y2k','anni 2000','glitter','rosa','retro','pop','bubblegum','cyber','brillante','barbie','festa'],
+  desc:'Anni Duemila rivisitati: rosa acceso, cromature, stelline e telefoni a conchiglia.',
+  pal:['#FF5FA2','#7AD7F0','#C9A7FF','#F3F3FB','#2B2D6E'], font:'Bricolage Grotesque + DM Sans',
+  mood:['Giocoso','Brillante','Nostalgico','Audace'], luce:'Flash diretto, colori saturi, riflessi lucidi.',
+  ideas:['Selfie con flash','Reel: outfit change veloce','Dettaglio: gloss e glitter','Foto: sticker e stelline','Carosello: playlist del momento','Collage anni 2000','Foto: telefono a conchiglia'],
+  tag:['#y2k','#y2kaesthetic','#bubblegum','#2000s','#popculture'] },
+{ nome:'Vaporwave', kw:['vaporwave','neon','notte','synth','retrowave','anni 80','citta','tramonto','viola','arcade','videogiochi','gaming'],
+  desc:'Neon, statue greche e tramonti digitali: nostalgia di un futuro mai arrivato.',
+  pal:['#FF71CE','#01CDFE','#05FFA1','#B967FF','#1A1033'], font:'Space Grotesk + DM Sans',
+  mood:['Notturno','Sognante','Digitale','Retro-futuro'], luce:'Neon su sfondo scuro, riflessi su asfalto bagnato.',
+  ideas:['Foto: insegna al neon','Reel: città di notte in auto','Grafica: griglia e tramonto','Dettaglio: cassetta e cuffie','Carosello: playlist synthwave','Foto: riflesso sulla pioggia','Collage con busto greco'],
+  tag:['#vaporwave','#synthwave','#neon','#retrowave','#nightvibes'] },
+{ nome:'Mediterraneo Solare', kw:['mare','estate','vacanza','vacanze','spiaggia','sole','mediterraneo','italia','costa','limone','blu','barca','isola'],
+  desc:'Blu profondo, limoni e muri bianchi: l\'estate italiana vista dalla costa.',
+  pal:['#0E4C92','#2E8BC0','#F6E7B4','#F2C14E','#FFF9EC'], font:'DM Serif Display + DM Sans',
+  mood:['Solare','Libero','Fresco','Vacanziero'], luce:'Sole alto, ombre nette, blu molto saturo.',
+  ideas:['Foto: ombrellone e mare','Reel: tuffo dalla barca','Dettaglio: limoni sul tavolo','Foto: vicolo bianco e blu','Carosello: diario di viaggio','Aperitivo sul terrazzo','Foto: orlo del vestito e sabbia'],
+  tag:['#mediterraneo','#summervibes','#italiasummer','#seaside','#vacanza'] },
+{ nome:'Soft Luxury', kw:['skincare','benessere','lusso','eleganza','beige','moda','wellness','yoga','spa','profumo','bellezza','crema'],
+  desc:'Eleganza silenziosa: toni sabbia, materiali morbidi e routine curate.',
+  pal:['#3A332F','#8C7B6B','#C9B8A6','#E8DDD0','#F7F2EC'], font:'Cormorant Garamond + Inter',
+  mood:['Elegante','Curato','Morbido','Raffinato'], luce:'Luce soffusa di mattina, riflessi caldi e pelle luminosa.',
+  ideas:['Foto: routine skincare','Reel: caffè e giornale','Dettaglio: seta e beige','Foto: accappatoio e tè','Carosello: la mia mattina','Profumo su vassoio','Testo: abitudine del giorno'],
+  tag:['#softlife','#cleanaesthetic','#selfcare','#quietluxury','#morningroutine'] },
+{ nome:'Urban Grunge', kw:['urbano','street','streetwear','grunge','musica','rock','skate','graffiti','nero','concerto','punk','citta'],
+  desc:'Asfalto, adesivi e serigrafie: l\'energia sporca e sincera della strada.',
+  pal:['#111111','#3B3B3B','#7A1F1F','#8A8A8A','#D9D9D2'], font:'Bricolage Grotesque + DM Sans',
+  mood:['Ruvido','Ribelle','Notturno','Autentico'], luce:'Flash duro, grana alta, contrasto forte.',
+  ideas:['Foto: skate sotto un ponte','Reel: backstage del concerto','Dettaglio: adesivi su muro','Foto: giacca di pelle','Carosello: playlist del mese','Graffito del quartiere','Foto: scarpe sull\'asfalto'],
+  tag:['#grunge','#streetstyle','#urbanphotography','#skate','#undergroundmusic'] },
+{ nome:'Boho Terra', kw:['boho','deserto','terra','viaggio','artigianale','sabbia','piante','macrame','hippie','festival','africa','marocco'],
+  desc:'Terracotta, frange e piante: un viaggio lento tra deserti e mercati.',
+  pal:['#9C4A2F','#D08C5B','#E8C89A','#6E7B4F','#F4E6D3'], font:'Fraunces + Nunito',
+  mood:['Caldo','Libero','Artigianale','Errante'], luce:'Ora dorata, controluce e polvere nell\'aria.',
+  ideas:['Foto: tappeto e piante','Reel: tramonto nel deserto','Dettaglio: macramè','Foto: mercato e spezie','Carosello: viaggio in furgone','Tè sul pavimento','Foto: gioielli fatti a mano'],
+  tag:['#boho','#bohostyle','#wanderlust','#handmade','#sunsetlover'] },
+{ nome:'Forest Core', kw:['bosco','foresta','muschio','montagna','escursione','verde','mistero','funghi','trekking','campeggio','alberi','nebbia'],
+  desc:'Nebbia tra gli alberi, muschio e sentieri: calma profonda e un po\' di mistero.',
+  pal:['#16281F','#2F4B38','#5E7F55','#8A7A52','#D3D9C4'], font:'Lora + DM Sans',
+  mood:['Silenzioso','Misterioso','Fresco','Selvatico'], luce:'Luce filtrata dalle foglie, nebbia, verdi scuri.',
+  ideas:['Foto: sentiero nella nebbia','Reel: passi sul muschio','Dettaglio: funghi e foglie','Foto: tenda all\'alba','Carosello: zaino per un\'uscita','Tazza fumante in cima','Foto: raggi tra gli alberi'],
+  tag:['#forestcore','#escursionismo','#nebbia','#montagna','#naturelover'] },
+{ nome:'Kawaii Pastello', kw:['pastel','pastello','kawaii','dolci','carino','unicorno','caramelle','gatto','giapponese','cute','peluche','torta'],
+  desc:'Colori da zucchero filato, pupazzetti e cose piccole che fanno sorridere.',
+  pal:['#FFB5D8','#B8E0FF','#FFF1A8','#C9F2D0','#FFF8FB'], font:'Fredoka + Nunito',
+  mood:['Tenero','Allegro','Giocoso','Zuccherato'], luce:'Luce chiara e uniforme, nessuna ombra dura.',
+  ideas:['Foto: dolcetti colorati','Reel: unboxing di cancelleria','Dettaglio: peluche e nastri','Foto: gatto addormentato','Carosello: i miei sticker','Merenda pastello','Disegno del giorno'],
+  tag:['#kawaii','#pastelaesthetic','#cuteaesthetic','#sweetlife','#stationery'] },
+{ nome:'Brutalismo Chic', kw:['cemento','architettura','brutalismo','geometrico','grigio','design','industriale','moderno','arte','galleria','grafica'],
+  desc:'Cemento, linee nette e un solo colore acceso a rompere il grigio.',
+  pal:['#2A2A2A','#6B6B6B','#A3A19C','#D4D2CC','#E8581C'], font:'Space Grotesk + Inter',
+  mood:['Netto','Geometrico','Freddo','Deciso'], luce:'Cielo coperto, ombre lunghe e angoli secchi.',
+  ideas:['Foto: facciata in cemento','Reel: scale e geometrie','Dettaglio: spigolo e ombra','Foto: persona sola nel palazzo','Carosello: 5 edifici da vedere','Poster arancione su grigio','Foto: ponte visto dal basso'],
+  tag:['#brutalism','#architecture','#minimalarchitecture','#concrete','#designinspo'] },
+{ nome:'Trattoria Calda', kw:['cibo','ricette','ricetta','cucina','pasta','cena','vino','caffe','pizza','ristorante','dolce','colazione','aperitivo'],
+  desc:'Tavole apparecchiate, salsa sui bordi del piatto e cene che durano ore.',
+  pal:['#8E1B1B','#D6532B','#E9B44C','#4F6B3A','#F8EBD4'], font:'DM Serif Display + DM Sans',
+  mood:['Goloso','Conviviale','Caldo','Casalingo'], luce:'Luce laterale da finestra, vista dall\'alto sul tavolo.',
+  ideas:['Foto: pasta fatta a mano','Reel: pomodoro che bolle','Dettaglio: vino nel bicchiere','Tavola vista dall\'alto','Carosello: ricetta in 4 passi','Caffè e cornetto','Foto: mani che impastano'],
+  tag:['#foodphotography','#cucinaitaliana','#pasta','#ricette','#foodlover'] },
+{ nome:'Energia Viva', kw:['sport','palestra','corsa','energia','allenamento','salute','motivazione','fitness','running','calcio','nuoto','bici'],
+  desc:'Movimento, sudore e colori vivi su sfondo scuro: tutto parla di ritmo.',
+  pal:['#0B0F14','#FF3D2E','#FFC857','#2EC4B6','#F1F5F9'], font:'Bricolage Grotesque + Inter',
+  mood:['Dinamico','Motivato','Intenso','Vitale'], luce:'Luce dura dall\'alto, controluce all\'alba.',
+  ideas:['Foto: scarpe prima della corsa','Reel: ultimo set in palestra','Dettaglio: gocce di sudore','Foto: alba sul percorso','Carosello: la settimana di allenamento','Citazione motivazionale','Foto: borraccia e asciugamano'],
+  tag:['#fitness','#allenamento','#motivation','#running','#healthylifestyle'] }
+];
+const EXAMPLES = ['mare, estate, vintage','libri, autunno, caffè','neon, notte, città','bosco, silenzio, muschio','skincare, calma, beige','pizza, cena, amici'];
+const SUFFIX = ['Mood','Core','Club','Hour','Diary','Studio'];
+
+function norm(s){ return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
+function toks(s){ return norm(s).split(/[^a-z0-9]+/).filter(function(w){ return w.length > 1; }); }
+function hash(s){ var h = 2166136261; for (var i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h,16777619); } return h>>>0; }
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed>>>15, 1|seed); t = t + Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+function textOn(hex){ var n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255; return (0.299*r+0.587*g+0.114*b) > 150 ? '#111111' : '#FFFFFF'; }
+function shuffle(arr, r){ var a=arr.slice(); for (var i=a.length-1;i>0;i--){ var j=Math.floor(r()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function matchKw(a, text, tk){
+  var out = [];
+  a.kw.forEach(function(k){
+    var nk = norm(k), hit;
+    if (nk.indexOf(' ') > -1) hit = text.indexOf(nk) > -1;
+    else hit = tk.some(function(t){ return t===nk || (t.length>=4 && nk.length>=4 && (nk.indexOf(t)===0 || t.indexOf(nk)===0 || t.slice(0,5)===nk.slice(0,5))); });
+    if (hit) out.push(k);
+  });
+  return out;
+}
+
+function words(input){
+  var seen = {}, out = [];
+  input.split(/[,;\n]+|\s+/).forEach(function(w){ w = w.trim(); var n = norm(w); if (w && n.length>1 && !seen[n]) { seen[n]=1; out.push(w); } });
+  return out.slice(0,6);
+}
+
+function build(a, matched, r, w){
+  return { nome:a.nome, desc:a.desc, pal:a.pal, font:a.font, mood:a.mood, luce:a.luce,
+    ideas: shuffle(a.ideas, r).slice(0,6), tag:a.tag, matched:matched, words:w, fusione:false };
+}
+
+function generate(input, seed){
+  var text = norm(input), tk = toks(input), w = words(input);
+  var r = rng(hash(text) + seed*977);
+  var scored = LIB.map(function(a){ var m = matchKw(a,text,tk); return { a:a, m:m, s: m.length + r()*(seed ? 1.6 : 0.4) }; })
+    .sort(function(x,y){ return y.s - x.s; });
+  var A = scored[0], B = scored[1];
+  var first = build(A.a, A.m, r, w), second = build(B.a, B.m, r, w);
+  var main = w[0] || 'Il mio';
+  var mixIdeas = first.ideas.slice(0,3).concat(second.ideas.slice(0,3));
+  var all = A.m.concat(B.m);
+  var fus = { nome: cap(norm(main)==='' ? 'Il mio' : main) + ' ' + SUFFIX[Math.floor(r()*SUFFIX.length)],
+    desc:'Un mix di ' + A.a.nome + ' e ' + B.a.nome + ', costruito sulle tue parole.',
+    pal:[A.a.pal[0],A.a.pal[2],B.a.pal[1],B.a.pal[3],B.a.pal[4]],
+    font: A.a.font.split(' + ')[0] + ' + ' + B.a.font.split(' + ')[1],
+    mood:[A.a.mood[0],A.a.mood[1],B.a.mood[0],B.a.mood[1]], luce:A.a.luce,
+    ideas: shuffle(mixIdeas, r), tag: A.a.tag.slice(0,3).concat(B.a.tag.slice(0,2)),
+    matched: all.filter(function(x,i){ return all.indexOf(x)===i; }), words:w, fusione:true };
+  return [first, second, fus];
+}
+
+function tiles(c){
+  var k = (c.words[0] || 'il mio feed'), p = c.pal, i = c.ideas;
+  return [
+    {t:i[0],c:p[0]}, {t:'«'+k+'»',c:p[2],q:1}, {t:i[1],c:p[1]},
+    {t:'Colore del mese '+p[3],c:p[3]}, {t:i[2],c:p[4]}, {t:i[3],c:p[2]},
+    {t:'Dettaglio: '+k,c:p[1]}, {t:i[4],c:p[3]}, {t:i[5],c:p[0]}
+  ];
+}
+function bioOf(c){
+  var w = c.words;
+  return cap(w[0]||'Il mio mondo') + (w[1] ? ' & ' + w[1] : '') + '\n' + c.mood.slice(0,3).join(' · ');
+}
+
+function card(c, idx, saved, mode){
+  var key = c.nome + '|' + c.words.join(',');
+  var hits = c.matched.length
+    ? '<div class="sec"><div class="kicker">Parole riconosciute</div><div class="chips">' + c.matched.slice(0,6).map(function(m){ return '<span class="chip hit">'+esc(m)+'</span>'; }).join('') + '</div></div>'
+    : '';
+  var bio = bioOf(c);
+  var tags = c.tag.join(' ');
+  return '<article class="card" data-key="'+esc(key)+'" data-i="'+idx+'" data-mode="'+mode+'">' +
+    '<div class="card-head"><div><div class="kicker">' + (c.fusione ? 'Fusione su misura' : 'Estetica') + '</div><h2>'+esc(c.nome)+'</h2><p class="desc">'+esc(c.desc)+'</p></div>' +
+    '<button class="save" type="button" data-act="save" aria-pressed="'+(saved?'true':'false')+'">'+(saved?'Salvata':'Salva')+'</button></div>' +
+    hits +
+    '<div class="sec"><div class="kicker">Palette · tocca per copiare</div><div class="pal">' + c.pal.map(function(h){ return '<button type="button" class="sw" data-act="copy" data-text="'+h+'" style="background:'+h+';color:'+textOn(h)+'">'+h+'</button>'; }).join('') + '</div></div>' +
+    '<dl class="kv"><dt>Atmosfera</dt><dd><span class="chips">' + c.mood.map(function(m){ return '<span class="chip">'+esc(m)+'</span>'; }).join('') + '</span></dd><dt>Font</dt><dd>'+esc(c.font)+'</dd><dt>Luce</dt><dd>'+esc(c.luce)+'</dd></dl>' +
+    '<div class="sec"><div class="kicker">Il tuo feed, 9 post</div><div class="grid">' + tiles(c).map(function(t){ return '<div class="tile'+(t.q?' q':'')+'" style="background:'+t.c+';color:'+textOn(t.c)+'">'+esc(t.t)+'</div>'; }).join('') + '</div></div>' +
+    '<div class="sec"><div class="kicker">Bio suggerita</div><div class="bio">'+esc(bio)+'</div><div class="tags">'+esc(tags)+'</div></div>' +
+    '<div class="actions"><button class="ghost" type="button" data-act="copy" data-text="'+esc(bio)+'">Copia bio</button><button class="ghost" type="button" data-act="copy" data-text="'+esc(tags)+'">Copia hashtag</button></div>' +
+  '</article>';
+}
+
+var state = { results: [], seed: 0, saved: [] };
+function load(){ try { var s = JSON.parse(localStorage.getItem('feed-estetiche-salvate')||'[]'); if (Array.isArray(s)) state.saved = s; } catch(e){} }
+function persist(){ try { localStorage.setItem('feed-estetiche-salvate', JSON.stringify(state.saved)); } catch(e){} }
+function keyOf(c){ return c.nome + '|' + c.words.join(','); }
+function isSaved(c){ var k = keyOf(c); return state.saved.some(function(s){ return keyOf(s)===k; }); }
+
+function toast(msg){
+  var t = document.getElementById('toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(function(){ t.hidden = true; }, 1800);
+}
+function copyText(text){
+  function fallback(){
+    try { var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); var ok=document.execCommand('copy'); document.body.removeChild(ta); toast(ok?'Copiato':'Copia non riuscita'); } catch(e){ toast('Copia non riuscita'); }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ toast('Copiato'); }, fallback);
+  else fallback();
+}
+
+function renderCreate(){
+  var out = document.getElementById('out');
+  var input = document.getElementById('kw').value.trim();
+  if (!input) { out.innerHTML = '<p class="empty">Scrivi almeno una parola, per esempio «mare» o «libri».</p>'; return; }
+  state.results = generate(input, state.seed);
+  out.innerHTML = state.results.map(function(c,i){ return card(c,i,isSaved(c),'new'); }).join('');
+  try { localStorage.setItem('feed-estetiche-input', input); } catch(e){}
+}
+function renderSaved(){
+  var v = document.getElementById('view-salvate');
+  document.getElementById('tab-salvate').textContent = 'Salvate (' + state.saved.length + ')';
+  if (!state.saved.length) { v.innerHTML = '<p class="empty">Non hai ancora salvato niente. Tocca «Salva» su un\'estetica che ti piace.</p>'; return; }
+  v.innerHTML = state.saved.map(function(c,i){ return card(c,i,true,'saved'); }).join('');
+}
+function show(which){
+  var crea = which === 'crea';
+  document.getElementById('view-crea').hidden = !crea;
+  document.getElementById('view-salvate').hidden = crea;
+  document.getElementById('tab-crea').setAttribute('aria-pressed', crea);
+  document.getElementById('tab-salvate').setAttribute('aria-pressed', !crea);
+  if (!crea) renderSaved();
+}
+
+document.getElementById('ex').innerHTML = EXAMPLES.map(function(e){ return '<button type="button" data-ex="'+esc(e)+'">'+esc(e)+'</button>'; }).join('');
+document.getElementById('f').addEventListener('submit', function(e){ e.preventDefault(); state.seed = 0; renderCreate(); });
+document.getElementById('more').addEventListener('click', function(){ state.seed++; renderCreate(); });
+document.getElementById('tab-crea').addEventListener('click', function(){ show('crea'); });
+document.getElementById('tab-salvate').addEventListener('click', function(){ show('salvate'); });
+document.addEventListener('click', function(e){
+  var ex = e.target.closest('[data-ex]');
+  if (ex) { document.getElementById('kw').value = ex.getAttribute('data-ex'); state.seed = 0; renderCreate(); return; }
+  var b = e.target.closest('[data-act]'); if (!b) return;
+  if (b.dataset.act === 'copy') { copyText(b.dataset.text); return; }
+  if (b.dataset.act === 'save') {
+    var cardEl = b.closest('.card'), i = +cardEl.dataset.i, mode = cardEl.dataset.mode;
+    var c = mode === 'saved' ? state.saved[i] : state.results[i];
+    var k = keyOf(c);
+    if (isSaved(c)) { state.saved = state.saved.filter(function(s){ return keyOf(s)!==k; }); toast('Rimossa dalle salvate'); }
+    else { state.saved.push(c); toast('Salvata'); }
+    persist();
+    document.getElementById('tab-salvate').textContent = 'Salvate (' + state.saved.length + ')';
+    if (mode === 'saved') renderSaved(); else renderCreate();
+  }
+});
+
+load();
+try { var prev = localStorage.getItem('feed-estetiche-input'); if (prev) document.getElementById('kw').value = prev; } catch(e){}
+document.getElementById('tab-salvate').textContent = 'Salvate (' + state.saved.length + ')';
+renderCreate();
+</script>
+
+</body>
+</html>
